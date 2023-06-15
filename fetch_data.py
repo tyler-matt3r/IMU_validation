@@ -13,7 +13,9 @@ s3_client = boto3.client('s3')
 def get_imu_data(k3y_id, org_id, start_date, end_date):
     return correct_drift.correct_clock(k3y_id, org_id, start_date, end_date)
 
-def get_events(k3y_id, org_id, start_date, end_date):
+def get_events(k3y_id, org_id, start_date_str, end_date_str):
+    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
     # get a list of all json files in the prefix and filter them to within the date range
     response = s3_client.list_objects(Bucket=CANSERVER_EVENT_BUCKET, Prefix=org_id + '/' + 'k3y-' + k3y_id + '/')
     all_keys = [item['Key'] for item in response['Contents']]
@@ -36,7 +38,9 @@ def get_events(k3y_id, org_id, start_date, end_date):
 
     return event_dict
 
-def get_can_data(k3y_id, org_id, start_date, end_date):
+def get_can_data(k3y_id, org_id, start_date_str, end_date_str):
+    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
     # get a list of all parquet files in the prefix and filter them to within the date range
     response = s3_client.list_objects_v2(Bucket=CANSERVER_PARSED_BUCKET, Prefix=org_id + '/' + 'k3y-' + k3y_id + '/')
     all_keys = [item['Key'] for item in response.get('Contents', [])]
