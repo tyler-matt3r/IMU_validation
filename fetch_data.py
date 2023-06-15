@@ -4,6 +4,8 @@ import datetime
 import pandas as pd
 from io import BytesIO
 import correct_drift
+import importlib
+importlib.reload(correct_drift)
 
 CANSERVER_PARSED_BUCKET = 'matt3r-canserver-us-west-2'
 CANSERVER_EVENT_BUCKET = 'matt3r-canserver-event-us-west-2'
