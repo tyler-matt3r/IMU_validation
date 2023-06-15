@@ -29,6 +29,9 @@ def fetch_imu_data(imu_k3y_id, organization_id, start_date, end_date):
     return imu_df
 
 def fetch_time_data(imu_k3y_id, organization_id, start_date, end_date):
+    # create a 1 day buffer to capture any data on the boundaries
+    start_date = start_date - datetime.timedelta(days=1)
+    end_date = end_date + datetime.timedelta(days=1)
     # get a list of all parquet files in the prefix and filter them to within the date range
     response = s3_client.list_objects(Bucket=IMU_BUCKET, Prefix=organization_id + '/' + 'k3y-' + imu_k3y_id + '/infer/')
     all_keys = [item['Key'] for item in response['Contents']]
@@ -84,7 +87,7 @@ def shift_time(imu_df, time_df):
 
     return imu_df
 
-def correct_imu(imu_k3y_id, organization_id, start_date_str, end_date_str):
+def correct_clock(imu_k3y_id, organization_id, start_date_str, end_date_str):
     start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
     end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
     imu_df = fetch_imu_data(imu_k3y_id, organization_id, start_date, end_date)
