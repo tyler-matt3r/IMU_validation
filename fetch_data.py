@@ -66,3 +66,50 @@ def get_can_data(k3y_id, org_id, start_date_str, end_date_str):
     can_df = pd.concat(df_list, axis=0, ignore_index=True)
 
     return can_df
+
+def get_raw_data(k3y_id, org_id, start_date_str, end_date_str):
+    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+
+    # get a list of all accel parquet files in the prefix and filter them to within the date range
+    response = s3_client.list_objects(Bucket=IMU_BUCKET, Prefix=org_id + '/' + 'k3y-' + k3y_id + '/accel/')
+    all_keys = [item['Key'] for item in response['Contents']]
+    keys = [file for file in all_keys if file.split('.')[-1] == 'parquet'
+            and len(file.split('/')[-1].split('_')[1]) == 10
+            and datetime.datetime.strptime(file.split('/')[-1].split('_')[1], '%Y-%m-%d') >= start_date
+            and datetime.datetime.strptime(file.split('/')[-1].split('_')[1], '%Y-%m-%d') <= end_date]
+    keys = sorted(keys, key=lambda x: x.split('/')[-1].split('.')[0])
+
+    # retrieve and combine filtered perquet files
+    df_list = []
+    for key in keys:
+        response = s3_client.get_object(Bucket=IMU_BUCKET, Key=key)
+        buffer = BytesIO(response['Body'].read())
+        acc_df = pd.read_parquet(buffer, engine='pyarrow')
+        df_list.append(acc_df)
+    acc_df = pd.concat(df_list, axis=0, ignore_index=True)
+
+    # get a list of all gyro parquet files in the prefix and filter them to within the date range
+    response = s3_client.list_objects(Bucket=IMU_BUCKET, Prefix=org_id + '/' + 'k3y-' + k3y_id + '/gyro/')
+    all_keys = [item['Key'] for item in response['Contents']]
+    keys = [file for file in all_keys if file.split('.')[-1] == 'parquet'
+            and len(file.split('/')[-1].split('_')[1]) == 10
+            and datetime.datetime.strptime(file.split('/')[-1].split('_')[1], '%Y-%m-%d') >= start_date
+            and datetime.datetime.strptime(file.split('/')[-1].split('_')[1], '%Y-%m-%d') <= end_date]
+    keys = sorted(keys, key=lambda x: x.split('/')[-1].split('.')[0])
+
+    # retrieve and combine filtered perquet files
+    df_list = []
+    for key in keys:
+        response = s3_client.get_object(Bucket=IMU_BUCKET, Key=key)
+        buffer = BytesIO(response['Body'].read())
+        gyro_df = pd.read_parquet(buffer, engine='pyarrow')
+        df_list.append(gyro_df)
+    gyro_df = pd.concat(df_list, axis=0, ignore_index=True)
+
+    acc_df.dropna(inplace=True)
+    acc_df.reset_index(drop=True, inplace=True)
+    gyro_df.dropna(inplace=True)
+    gyro_df.reset_index(drop=True, inplace=True)
+
+    return acc_df, gyro_df
