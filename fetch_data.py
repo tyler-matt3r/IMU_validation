@@ -12,8 +12,13 @@ CANSERVER_EVENT_BUCKET = 'matt3r-canserver-event-us-west-2'
 IMU_BUCKET = 'matt3r-imu-us-west-2'
 s3_client = boto3.client('s3')
 
-def get_imu_data(k3y_id, org_id, start_date, end_date):
-    return correct_drift.correct_clock(k3y_id, org_id, start_date, end_date)
+def get_imu_data(k3y_id, org_id, start_date_str, end_date_str, correct_time=True):
+    if correct_time:
+        return correct_drift.correct_clock(k3y_id, org_id, start_date_str, end_date_str)
+    else:
+        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+        return correct_drift.fetch_imu_data(k3y_id, org_id, start_date, end_date)
 
 def get_events(k3y_id, org_id, start_date_str, end_date_str):
     start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
