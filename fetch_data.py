@@ -67,7 +67,8 @@ def get_can_data(k3y_id, org_id, start_date_str, end_date_str):
 
     return can_df
 
-def get_raw_data(k3y_id, org_id, start_date_str, end_date_str):
+def get_raw_data(k3y_id, org_id, start_date_str, end_date_str, time_correction=False):
+
     start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
     end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
 
@@ -98,7 +99,7 @@ def get_raw_data(k3y_id, org_id, start_date_str, end_date_str):
             and datetime.datetime.strptime(file.split('/')[-1].split('_')[1], '%Y-%m-%d') <= end_date]
     keys = sorted(keys, key=lambda x: x.split('/')[-1].split('.')[0])
 
-    # retrieve and combine filtered perquet files
+    # retrieve and combine filtered parquet files
     df_list = []
     for key in keys:
         response = s3_client.get_object(Bucket=IMU_BUCKET, Key=key)
@@ -106,6 +107,11 @@ def get_raw_data(k3y_id, org_id, start_date_str, end_date_str):
         gyro_df = pd.read_parquet(buffer, engine='pyarrow')
         df_list.append(gyro_df)
     gyro_df = pd.concat(df_list, axis=0, ignore_index=True)
+
+    if time_correction:
+        time_df = correct_drift.fetch_time_data(k3y_id, org_id, start_date, end_date)
+        acc_df = correct_drift.shift_time(acc_df, time_df)
+        gyro_df = correct_drift.shift_time(gyro_df, time_df)
 
     acc_df.dropna(inplace=True)
     acc_df.reset_index(drop=True, inplace=True)
