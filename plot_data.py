@@ -9,6 +9,7 @@ ac_sensor = {'name' : 'acc',
              'units' : 'm/s^2',
              'title' : 'Acceleration',
              'scale' : 15}
+
 def triaxis_plot(imu_df, can_df, start_time, sensor=ac_sensor):
     name = sensor['name']
     units = sensor['units']
@@ -46,4 +47,26 @@ def triaxis_plot(imu_df, can_df, start_time, sensor=ac_sensor):
     ax2.legend()
     ax3.legend()
     plt.tight_layout()
+    plt.show()
+
+def double_plot(x_data, x_data2, y_data1, y_data2, title, write_slope=True):
+
+    fig, ax = plt.subplots()
+    ax.scatter(x=x_data, y=y_data1, s=1)
+    ax.scatter(x=x_data2, y=y_data2, s=1)
+    plt.title(title, wrap = True)
+    plt.xlabel('Elapsed Time (h)')
+    plt.ylabel('Clock Difference (s)')
+
+    # set gridlines
+    ax.grid(True)
+    ax.minorticks_on()
+    ax.grid(which='major', color='grey', linestyle='-')
+    ax.grid(which='minor', color='lightgrey', linestyle=':')
+    # ax.set_xlim(left=0)
+
+    if write_slope:
+        m, b = np.polyfit(x_data, y_data1, 1)
+        plt.text(0.02, 0.95, f'Slope: {m:.3f} s/h', transform=plt.gca().transAxes)
+
     plt.show()
