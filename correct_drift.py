@@ -51,7 +51,7 @@ def fetch_time_data(imu_k3y_id, organization_id, start_date, end_date):
     time_df = pd.concat(df_list, axis=0, ignore_index=True)
 
     # drop any nan values
-    time_df.dropna(subset=['diff_sw_sys(second)'], inplace=True)
+    time_df.dropna(subset=['diff_sw_sys(second)', 'imu_sw_clock(epoch)', 'system_clock(epoch)'], inplace=True)
     time_df.reset_index(drop=True, inplace=True)
 
     return time_df
