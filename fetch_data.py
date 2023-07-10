@@ -19,6 +19,11 @@ def get_imu_data(k3y_id, org_id, start_date_str, end_date_str, correct_time=True
         start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
         return correct_drift.fetch_imu_data(k3y_id, org_id, start_date, end_date)
+    
+def get_time_data(k3y_id, org_id, start_date_str, end_date_str):
+    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+    return correct_drift.fetch_time_data(k3y_id, org_id, start_date, end_date)
 
 def get_events(k3y_id, org_id, start_date_str, end_date_str):
     start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
