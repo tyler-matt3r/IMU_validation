@@ -204,8 +204,8 @@ def FPR(imu_df, imu_dr_df, event_dict):
 if __name__ == "__main__":
     # ============================
     # imput k3y data
-    start_date_str = '2023-07-10'
-    end_date_str = '2023-07-10'
+    start_date_str = '2023-07-07'
+    end_date_str = '2023-07-09'
     organization_id = 'hamid'
     k3y_id = '17700cf8'
     # ============================
