@@ -204,15 +204,21 @@ def FPR(imu_df, imu_dr_df, event_dict):
 if __name__ == "__main__":
     # ============================
     # imput k3y data
-    start_date_str = '2023-07-07'
-    end_date_str = '2023-07-09'
+    # start_date_str = '2023-07-17'
+    # end_date_str = start_date_str
     organization_id = 'hamid'
     k3y_id = '17700cf8'
     # ============================
 
+    current_time = '2023-07-19T21:37:00Z'
+
+    prev_day = datetime.datetime.strptime(current_time, '%Y-%m-%dT%H:%M:%SZ') - datetime.timedelta(days=1)
+    start_date = datetime.datetime.combine(prev_day, datetime.time.min)
+    end_date = datetime.datetime.combine(prev_day, datetime.time.max)
+
     # convert to datetime objects
-    start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-    end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+    # start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+    # end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
 
     # fetch the data from the S3 buckets
     imu_df = fetch_imu_data(k3y_id, organization_id, start_date, end_date)
@@ -233,6 +239,6 @@ if __name__ == "__main__":
     fpr = FPR(imu_df, imu_dr_df, event_dict)
 
     # print results
-    print(f'Between {start_date_str} and {end_date_str},')
-    print(f'TPR is {tpr}')
-    print(f'FPR is {fpr}')
+    # print(f'Between {start_date_str} and {end_date_str},')
+    print(f'TPR is {round(tpr * 100, 1)}')
+    print(f'FPR is {round(fpr * 100, 2)}')
