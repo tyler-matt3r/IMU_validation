@@ -9,8 +9,13 @@ s3_client = boto3.client('s3')
 
 def fetch_imu_data(imu_k3y_id, organization_id, start_date, end_date):
     # get a list of all parquet files in the prefix and filter them to within the date range
-    response = s3_client.list_objects(Bucket=IMU_BUCKET, Prefix=organization_id + '/' + 'k3y-' + imu_k3y_id + '/accel/')
-    all_keys = [item['Key'] for item in response['Contents']]
+    response = s3_client.list_objects_v2(Bucket=IMU_BUCKET, Prefix=organization_id + '/' + 'k3y-' + imu_k3y_id + '/accel/')
+    all_keys = [item['Key'] for item in response.get('Contents', [])]
+
+    while response['IsTruncated']:
+        response = s3_client.list_objects_v2(Bucket=IMU_BUCKET, Prefix=organization_id + '/' + 'k3y-' + imu_k3y_id + '/accel/', ContinuationToken=response['NextContinuationToken'])
+        all_keys.extend([item['Key'] for item in response.get('Contents', [])])
+
     keys = [file for file in all_keys if file.split('.')[-1] == 'parquet'
             and len(file.split('/')[-1].split('_')[0]) == 10
             and datetime.datetime.strptime(file.split('/')[-1].split('_')[0], '%Y-%m-%d') >= start_date
