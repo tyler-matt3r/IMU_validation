@@ -63,7 +63,7 @@ def fetch_time_data(imu_k3y_id, organization_id, start_date, end_date):
 
 def shift_time(imu_df, time_df):
     # identify any jumps in the data
-    jump_limit = 2
+    jump_limit = 3
     jump_indexes = time_df[abs(time_df['diff_sw_sys(second)'].diff()) > jump_limit].index
     jump_indexes = jump_indexes.append(pd.Index([time_df.index[-1]]))
 
